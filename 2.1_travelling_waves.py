@@ -140,7 +140,6 @@ for step in range(int(tau_max/d_tau)+1):
     # u_val[np.where(u_val < 0)] = 0
 
 
-
     if step == int(tau_max/4/d_tau):
         measure_0 = (np.abs(u_val - u0/2)).argmin()
         print(f"middle of wave front is xi={measure_0} at tau={step*d_tau:.2f}")
@@ -178,3 +177,52 @@ plt.show()
 # %%
 # c
 
+xi0 = 50
+u0 = steady_state1*3
+
+fix, ax = plt.subplots(1, 2, figsize=(10, 6))
+
+tau_max = 200
+u_val = np.array([u0*np.exp(-(xi-xi0)**2) for xi in range(L)])
+for step in range(int(tau_max/d_tau)+1):
+    del_u_del_tau = model(u_val, rho, q)
+    u_val += del_u_del_tau * d_tau
+    u_val[0] = u_val[1]
+    # u_val[np.where(u_val < 0)] = 0
+    # plt.clf()
+    # plt.ylim(0, 1.2*steady_state1)
+    # plt.plot(u_val)
+    # plt.title(f'Wave at tau = {step*d_tau:.2f}')
+    # if step % 100 == 0:
+    #     plt.pause(0.01)
+
+    if step == int(tau_max/4/d_tau):
+        measure_0 = (np.abs(u_val[:L//2] - steady_state1/2)).argmin()
+        print(f"middle of wave front is xi={measure_0} at tau={step*d_tau:.2f}")
+    if step == int(3*tau_max/4/d_tau):
+        measure_1 = (np.abs(u_val[:L//2] - steady_state1/2)).argmin()
+        print(f"middle of wave front is xi={measure_1} at tau={step*d_tau:.2f}")
+        
+
+c = (measure_1 - measure_0) / (tau_max/2)
+print(f'c = {c:.2f}')
+
+ax[0].plot(u_val)
+ax[0].set_title(f'Wave at tau = {step*d_tau:.2f}')
+ax[0].set_xlabel(r'$\xi$')
+ax[0].set_ylabel(r'$u(\xi, \tau)$')
+
+v = np.gradient(u_val)
+ax[1].plot(u_val, v)
+ax[1].set_xlabel(r'$u(\xi, \tau)$')
+ax[1].set_ylabel(r'$\frac{\partial u}{\partial \xi}$')
+
+ax[1].scatter(steady_state0, 0, color='red', label='Steady State 0')
+ax[1].scatter(steady_state1, 0, color='blue', label='Steady State 1')
+ax[1].scatter(steady_state2, 0, color='green', label='Steady State 2')
+ax[1].legend()
+
+plt.tight_layout()
+plt.show()
+
+# %%
